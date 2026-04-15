@@ -1,0 +1,219 @@
+openapi: "3.0.3"
+
+info:
+  title: Meridian Fraud Risk Agent
+  version: "0.1.0"
+  description: >
+    Scores MRI pre-authorization requests for fraud risk signals using Gemini 2.5 Pro.
+    Designed for registration as a Salesforce External Service.
+    Note: no authentication scheme is configured — this is a demo simplification.
+    Add OAuth 2.0 / Named Credentials before production use.
+
+servers:
+  - url: https://fraud-agent-<hash>-uc.a.run.app
+    description: >
+      Replace with the Cloud Run service URL printed by deploy.sh.
+
+paths:
+  /tasks:
+    post:
+      operationId: scoreFraudRisk
+      summary: Score a pre-authorization request for fraud risk
+      description: >
+        Accepts an MRI pre-authorization request and returns a Gemini-generated
+        fraud-risk score with classification and rationale.
+        Outputs are for human-reviewer routing; they are not legal fraud determinations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FraudScoreRequest"
+            examples:
+              low_risk_example:
+                summary: Low-risk member (M-10047)
+                value:
+                  member_id: "M-10047"
+                  cpt: "73721"
+                  provider_npi: "1234567890"
+                  indication: "knee pain 3 months, MRI knee ordered"
+                  member_context:
+                    risk_tier: "standard"
+                    prior_auth_reversals_12mo: 0
+                    state: "TX"
+                    flags: []
+              high_risk_example:
+                summary: High-risk member (M-10099)
+                value:
+                  member_id: "M-10099"
+                  cpt: "73721"
+                  provider_npi: "9876543210"
+                  indication: "routine screening"
+                  member_context:
+                    risk_tier: "high"
+                    prior_auth_reversals_12mo: 6
+                    state: "TX"
+                    flags:
+                      - "geo_mismatch"
+                      - "duplicate_claim_pattern"
+      responses:
+        "200":
+          description: Fraud-risk score produced successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudScoreResponse"
+        "422":
+          description: Validation error — request body did not match schema.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+        "500":
+          description: Internal error — Gemini API call failed or returned unparseable output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPError"
+
+components:
+  schemas:
+
+    MemberContext:
+      type: object
+      required:
+        - risk_tier
+        - prior_auth_reversals_12mo
+        - state
+        - flags
+      properties:
+        risk_tier:
+          type: string
+          description: "Payer-assigned risk tier (e.g. 'standard', 'elevated', 'high')."
+          example: "standard"
+        prior_auth_reversals_12mo:
+          type: integer
+          minimum: 0
+          description: Number of prior-authorization reversals in the past 12 months.
+          example: 0
+        state:
+          type: string
+          description: Two-letter US state code for the member's primary residence.
+          example: "TX"
+        flags:
+          type: array
+          items:
+            type: string
+          description: Explicit risk flags already recorded against this member.
+          example: []
+
+    FraudScoreRequest:
+      type: object
+      required:
+        - member_id
+        - cpt
+        - provider_npi
+        - indication
+        - member_context
+      properties:
+        member_id:
+          type: string
+          description: Unique member identifier.
+          example: "M-10047"
+        cpt:
+          type: string
+          description: CPT procedure code being requested.
+          example: "73721"
+        provider_npi:
+          type: string
+          description: 10-digit NPI of the ordering provider.
+          example: "1234567890"
+        indication:
+          type: string
+          description: Free-text clinical indication supplied by the ordering provider.
+          example: "knee pain 3 months, MRI knee ordered"
+        member_context:
+          $ref: "#/components/schemas/MemberContext"
+
+    FraudScoreResponse:
+      type: object
+      required:
+        - risk_score
+        - classification
+        - rationale
+        - flags
+        - model_version
+        - decision_timestamp
+      properties:
+        risk_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Continuous fraud-risk score between 0 (no risk) and 1 (highest risk).
+          example: 0.08
+        classification:
+          type: string
+          enum:
+            - low_risk
+            - elevated
+            - high_risk
+          description: >
+            Categorical classification: low_risk (<0.30), elevated (0.30–0.69),
+            high_risk (>=0.70).
+          example: "low_risk"
+        rationale:
+          type: string
+          description: >
+            Human-readable explanation citing the specific signals that drove the score.
+            Required for audit and human-reviewer handoff.
+          example: >
+            No prior reversals in 12 months; indication matches CPT; provider in
+            expected geography.
+        flags:
+          type: array
+          items:
+            type: string
+          description: Short labels for signals that contributed to the score.
+          example: []
+        model_version:
+          type: string
+          description: Gemini model identifier used to produce this score.
+          example: "gemini-2.5-pro"
+        decision_timestamp:
+          type: string
+          format: date-time
+          description: ISO-8601 UTC timestamp of when the score was produced.
+          example: "2026-04-15T20:00:00Z"
+
+    HTTPError:
+      type: object
+      properties:
+        detail:
+          type: string
+
+    ValidationError:
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: integer
+        msg:
+          type: string
+        type:
+          type: string
+
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"

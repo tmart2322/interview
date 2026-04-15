@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: Meridian Benefits Verification API
+  version: 0.1.0
+  description: |
+    REST facade over the Meridian Health benefits-verification MCP server.
+    Designed to be imported into Salesforce as an External Service so that
+    Agentforce can invoke the two tools as first-class Agent Actions.
+servers:
+  - url: https://REPLACE-WITH-CLOUD-RUN-URL
+    description: Cloud Run deployment (replace after `./deploy.sh`)
+paths:
+  /mcp/tools/check_eligibility:
+    post:
+      operationId: checkEligibility
+      summary: Check member eligibility for a CPT procedure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EligibilityRequest'
+      responses:
+        '200':
+          description: Eligibility decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mcp/tools/get_coverage:
+    post:
+      operationId: getCoverage
+      summary: Retrieve coverage percentage, copay, and remaining deductible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoverageRequest'
+      responses:
+        '200':
+          description: Coverage detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    EligibilityRequest:
+      type: object
+      required: [member_id, cpt]
+      properties:
+        member_id:
+          type: string
+          example: M-10047
+        cpt:
+          type: string
+          example: "73721"
+    EligibilityResponse:
+      type: object
+      required: [eligible, network_status, prior_auth_required, reason_codes]
+      properties:
+        eligible:
+          type: boolean
+        network_status:
+          type: string
+          enum: [in-network, out-of-network, not-covered]
+        prior_auth_required:
+          type: boolean
+        reason_codes:
+          type: array
+          items:
+            type: string
+    CoverageRequest:
+      type: object
+      required: [member_id, cpt]
+      properties:
+        member_id:
+          type: string
+          example: M-10047
+        cpt:
+          type: string
+          example: "73721"
+    CoverageResponse:
+      type: object
+      required: [coverage_pct, copay, plan_year_remaining_deductible, reason_codes]
+      properties:
+        coverage_pct:
+          type: number
+          example: 80
+        copay:
+          type: number
+          example: 250
+        plan_year_remaining_deductible:
+          type: number
+          example: 450
+        reason_codes:
+          type: array
+          items:
+            type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string

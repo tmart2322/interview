@@ -4,6 +4,67 @@
 
 ---
 
+## STATUS (keep current — fresh sessions rely on this)
+
+**Last updated:** 2026-04-15, wave-1-complete
+
+### Wave 1 — parallel code generation (files only, no deploys)
+- [x] Vertex AI Fraud Agent (`/gcp/fraud-agent/` — Dockerfile, app/, deploy.sh, openapi.yaml, README)
+- [x] Slide deck + talk track (`/slides/deck.md`, `/slides/talk-track.md`)
+- [x] Mock data (`/data/sf-cases.json`, `servicenow-cases.json`, `cpt-codes.json`) — 30+30 cases, 21 CPTs; M-10047 wired for demo flow
+- [x] Benefits MCP server (`/gcp/benefits-mcp/` — Node/Express, REST + JSON-RPC, Dockerfile, deploy.sh, openapi.yaml, README)
+- [x] Meridian Health site (`/site/index.html` + `.github/workflows/pages.yml`) — single-page, snippet marker in place
+- [x] SF metadata scaffold (`/force-app/main/default/` — Case.MemberId__c, MRIPreAuthAgentPerms, 2 Named Credentials, 3 invocable Apex classes + test, `manifest/package.xml`)
+
+### Deployments (wave 2 — needs wave 1 done + user creds)
+- [ ] GCP: create fresh project, enable Vertex AI + Cloud Run APIs *(user action)*
+- [ ] Deploy Vertex Fraud Agent to Cloud Run (us-central1, min-instances=1)
+- [ ] Deploy Benefits MCP to Cloud Run (us-central1, min-instances=1)
+- [ ] GitHub: create repo `tmart2322/interview` (public), push /site/, enable Pages
+- [ ] Deploy SF metadata: `sf project deploy start --source-dir force-app --target-org interview`
+- [ ] Update SF Named Credential URLs to real Cloud Run URLs + redeploy
+
+### Salesforce UI work (requires Tristan clicks)
+- [ ] Register External Services for FraudAgent + BenefitsMCP via Setup UI
+- [ ] Assign `MRIPreAuthAgentPerms` to integration user
+- [ ] D360: create External Data Source → GitHub Pages servicenow-cases.json
+- [ ] D360: ingest + map to unified Case DMO + identity resolution ruleset
+- [ ] Agentforce: build Service Agent + 3 topics (Identity, Case Status, MRI Pre-Auth) + wire 4 actions
+- [ ] Agentforce: activate agent, test in preview
+- [ ] Embedded Messaging: create Embedded Service deployment, publish, grab snippet
+- [ ] Paste snippet into `/site/index.html` at `<!-- AGENTFORCE_EMBEDDED_MESSAGING_SNIPPET -->` marker
+- [ ] Redeploy site (git push triggers GH Actions)
+
+### Rehearsal + backup
+- [ ] End-to-end dry run #1 — fix what breaks
+- [ ] End-to-end dry run #2 — time the full 60-min talk track
+- [ ] Warm Cloud Run services (ping both 2x right before panel)
+- [ ] Record 90-second backup Loom video
+- [ ] Export slide deck to PDF as deeper backup
+
+### Confirmed decisions (do not re-debate)
+- Use case: HLS payer MRI pre-authorization, fictional "Meridian Health"
+- Stack: Agentforce (orchestrator) + D360 (semantic) + Vertex AI Gemini (A2A) + custom MCP server
+- MAF skipped — open-standards narrative (A2A + MCP) is the deliberate choice
+- GitHub: `tmart2322/interview`
+- GCP: fresh project (TBD ID)
+- SF org alias: `interview` (Data Cloud + Agentforce visible in App Launcher)
+- Demo mode: fully live with Loom backup
+
+### Known friction
+- gh CLI just installed via brew — auth status unverified
+- SF org: user confirmed D360 + Agentforce visible; `MRIPreAuthAgentPerms` does NOT exist yet (our deploy creates it)
+- User has gcloud authed as tristan@martindev.io; fresh project needs creation
+
+### Resume instructions for a fresh Claude Code session
+1. Read this file top-to-bottom (especially this STATUS block)
+2. Read `/Users/tristan/projects/interview/CLAUDE.md`
+3. `ls` each of `/data /gcp /site /slides /force-app/main/default` to see what's on disk
+4. Work the next unchecked box in STATUS; update this file as you complete tasks
+5. If Wave 1 agents are still stuck, re-fire them with the prompt `"NOT in plan mode, execute immediately"` as the first line
+
+---
+
 ## 0. Reality Check
 
 **Holes I poked (all resolved by scope cuts):**

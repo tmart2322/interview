@@ -56,13 +56,8 @@ gcloud run deploy "${SERVICE_NAME}" \
   --max-instances 3 \
   --memory 1Gi \
   --timeout 120 \
-  --set-env-vars "GEMINI_MODEL=gemini-2.5-pro" \
+  --set-env-vars "GEMINI_MODEL=gemini-2.5-pro,GCP_PROJECT=${GCP_PROJECT},GCP_LOCATION=${REGION}" \
   --project "${GCP_PROJECT}" \
-  # --allow-unauthenticated is intentional for this demo so Salesforce External
-  # Services can call the endpoint without OAuth token management.
-  # PRODUCTION NOTE: remove this flag and add proper authentication, such as
-  # Cloud Run IAM invoker bindings + Salesforce Named Credentials with
-  # JWT/OAuth 2.0, before handling real member PHI.
   --allow-unauthenticated
 
 echo ""

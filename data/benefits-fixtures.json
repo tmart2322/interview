@@ -1,0 +1,65 @@
+{
+  "M-10047|73721": {
+    "eligible": true,
+    "coverage_pct": 80,
+    "copay": 250,
+    "prior_auth_required": true,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 450,
+    "reason_codes": []
+  },
+  "M-10047|99213": {
+    "eligible": true,
+    "coverage_pct": 100,
+    "copay": 30,
+    "prior_auth_required": false,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 450,
+    "reason_codes": []
+  },
+  "M-10047|27447": {
+    "eligible": true,
+    "coverage_pct": 70,
+    "copay": 350,
+    "prior_auth_required": true,
+    "network_status": "out-of-network",
+    "plan_year_remaining_deductible": 1200,
+    "reason_codes": ["OON_PENALTY"]
+  },
+  "M-20001|99213": {
+    "eligible": true,
+    "coverage_pct": 90,
+    "copay": 20,
+    "prior_auth_required": false,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 0,
+    "reason_codes": []
+  },
+  "M-20001|73721": {
+    "eligible": false,
+    "coverage_pct": 0,
+    "copay": 0,
+    "prior_auth_required": false,
+    "network_status": "not-covered",
+    "plan_year_remaining_deductible": 0,
+    "reason_codes": ["NOT_COVERED", "PLAN_EXCLUSION"]
+  },
+  "M-30099|99385": {
+    "eligible": true,
+    "coverage_pct": 100,
+    "copay": 0,
+    "prior_auth_required": false,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 750,
+    "reason_codes": ["PREVENTIVE_CARE"]
+  },
+  "M-30099|70553": {
+    "eligible": true,
+    "coverage_pct": 75,
+    "copay": 150,
+    "prior_auth_required": true,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 750,
+    "reason_codes": []
+  }
+}

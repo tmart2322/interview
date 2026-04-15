@@ -1,0 +1,128 @@
+[
+  {
+    "code": "73721",
+    "description": "MRI any joint of lower extremity without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "73722",
+    "description": "MRI any joint of lower extremity with contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "73723",
+    "description": "MRI any joint of lower extremity without and with contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "70553",
+    "description": "MRI brain without and with contrast material",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "70551",
+    "description": "MRI brain without contrast material",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "72148",
+    "description": "MRI lumbar spine without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "72141",
+    "description": "MRI cervical spine without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "73221",
+    "description": "MRI any joint of upper extremity without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "74181",
+    "description": "MRI abdomen without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "72195",
+    "description": "MRI pelvis without contrast",
+    "category": "Imaging",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "99213",
+    "description": "Office or other outpatient visit, established patient, 20-29 minutes",
+    "category": "Office Visit",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "99214",
+    "description": "Office or other outpatient visit, established patient, 30-39 minutes",
+    "category": "Office Visit",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "99203",
+    "description": "Office or other outpatient visit, new patient, 30-44 minutes",
+    "category": "Office Visit",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "99385",
+    "description": "Initial comprehensive preventive medicine evaluation, adult 18-39",
+    "category": "Preventive",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "99386",
+    "description": "Initial comprehensive preventive medicine evaluation, adult 40-64",
+    "category": "Preventive",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "99396",
+    "description": "Periodic comprehensive preventive medicine reevaluation, adult 40-64",
+    "category": "Preventive",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "G0439",
+    "description": "Annual wellness visit, subsequent (Medicare)",
+    "category": "Preventive",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "27447",
+    "description": "Total knee arthroplasty (knee replacement)",
+    "category": "Procedure",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "27130",
+    "description": "Total hip arthroplasty (hip replacement)",
+    "category": "Procedure",
+    "typical_prior_auth_required": true
+  },
+  {
+    "code": "45378",
+    "description": "Colonoscopy, diagnostic",
+    "category": "Procedure",
+    "typical_prior_auth_required": false
+  },
+  {
+    "code": "29881",
+    "description": "Arthroscopy, knee, surgical with meniscectomy",
+    "category": "Procedure",
+    "typical_prior_auth_required": true
+  }
+]
