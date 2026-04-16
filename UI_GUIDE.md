@@ -30,15 +30,128 @@ If either toggle is off, click it. No downstream step works until both are on.
 
 ---
 
-## Steps 2 & 3 — SKIP (done via metadata)
+## Steps 2 & 3 — Recreate the 5 Agent Actions in UI, attach to topic (~8 min)
 
-Five Agent Actions (GenAiFunctions) and one Topic (GenAiPlugin) are already deployed:
-- `ScoreFraudRisk`, `CheckEligibility`, `GetCoverage`, `CreatePreAuthCase`, `UpdatePreAuthCase`
-- Topic `MRIPreAuth` ("MRI Pre-Authorization") binds all 5 with a full ReAct planner instruction block.
+**Why this is necessary**: We deployed 5 `GenAiFunction` metadata records and a `GenAiPlugin` topic that binds them. The Topic shell works (the agent picks "MRI Pre-Authorization" correctly), but the 5 functions are structurally incomplete — Salesforce can't retrieve them and reports:
+> "The Input LightningTypeBundle schema for action 'X' could not be found. Please remove and re-add the action from the asset library to ensure schema availability."
 
-Also deployed: `GenAiPlannerBundle MRIPreAuthPlanner` (ReAct planner wrapping the topic).
+The `LightningTypeBundle` is auto-generated only when you pick an Apex class through the Agent Builder UI. XML deploys skip this generation.
 
-**Verify in UI** (~30 sec): Setup → **Agents** → **Agent Actions** — you should see the 5 actions. Setup → **Agents** → **Topics** — you should see "MRI Pre-Authorization".
+### Step A — Confirm the 5 deployed Agent Actions exist
+
+**Setup → Agents → Agent Actions** (or use Quick Find → "Agent Actions").
+
+You should see 5 rows:
+- `CheckEligibility`
+- `CreatePreAuthCase`
+- `GetCoverage`
+- `ScoreFraudRisk`
+- `UpdatePreAuthCase`
+
+These are the broken-from-metadata ones. They must be deleted before recreating.
+
+### Step B — Delete the 5 broken Actions
+
+For each row: dropdown arrow on the right → **Delete**. Confirm.
+
+If **Delete** is greyed out: open the MRI Pre-Authorization **Topic** (Agent Builder → Topics), remove any action references there, save, then come back to Step B.
+
+### Step C — Create the 5 Actions fresh via UI
+
+**Setup → Agents → Agent Actions → New Agent Action** (blue button, top right).
+
+For each of the 5, walk this form:
+
+#### Action 1 — Score MRI Pre-Auth Fraud Risk
+- **Reference Action Type**: **Apex**
+- **Reference Action**: `FraudAgentAction.scoreRisk` *(start typing "Fraud" to filter the dropdown)*
+- Click **Next**
+- **Agent Action Label**: `Score MRI Pre-Auth Fraud Risk`
+- **Agent Action API Name**: `ScoreFraudRisk`
+- **Agent Action Instructions**:
+  > Score a submitted MRI pre-authorization request for fraud risk on a 0–1 scale using the Vertex AI agent. Call this AFTER creating the Case, with memberId, cpt, providerNpi, and indication collected from the member.
+- Scroll to **Inputs** (auto-populated from Apex):
+  - `memberId`: description "Meridian member ID like M-10047". **Required: yes**. Show in Conversation: yes.
+  - `cpt`: description "CPT procedure code". **Required: yes**. Show in Conversation: yes.
+  - `providerNpi`: description "10-digit NPI of ordering provider". Required: no. Show in Conversation: yes.
+  - `indication`: description "Clinical indication / reason". Required: no. Show in Conversation: yes.
+  - `riskTier`, `priorAuthReversals12mo`, `state`: **Show in Conversation: NO** (these come from backend, not the member).
+- **Outputs**: verify `riskScore`, `classification`, `rationale`, `flags` appear. No changes needed.
+- Click **Finish**.
+
+#### Action 2 — Check Member Benefits Eligibility
+- Type: **Apex** | Reference: `BenefitsMCPAction.checkEligibility`
+- Label: `Check Member Benefits Eligibility` | API Name: `CheckEligibility`
+- Instructions:
+  > Verify whether the member is eligible for the requested CPT and whether prior authorization is required. Call in parallel with Score MRI Pre-Auth Fraud Risk.
+- Inputs: `memberId` (Required), `cpt` (Required). Show both in Conversation.
+- Outputs: `eligible`, `networkStatus`, `priorAuthRequired`, `reasonCodes`, `errorMessage` — no changes.
+- Finish.
+
+#### Action 3 — Get Member Coverage Details
+- Type: **Apex** | Reference: `BenefitsCoverageAction.getCoverage`
+- Label: `Get Member Coverage Details` | API Name: `GetCoverage`
+- Instructions:
+  > Call AFTER eligibility is confirmed to get coverage %, copay, and remaining deductible. Include copay + coverage % in the member's approval message.
+- Inputs: `memberId` (Required), `cpt` (Required).
+- Outputs: `coveragePct`, `copay`, `planYearRemainingDeductible`, `reasonCodes`, `errorMessage`.
+- Finish.
+
+#### Action 4 — Create MRI Pre-Auth Case
+- Type: **Apex** | Reference: `PreAuthCaseAction.createCase`
+- Label: `Create MRI Pre-Auth Case` | API Name: `CreatePreAuthCase`
+- Instructions:
+  > Create a Salesforce Case immediately after collecting memberId, cpt, providerNpi, and indication. The returned caseId MUST be saved — Update Pre-Auth Case Decision needs it later.
+- Inputs: `memberId` (Required), `cpt` (Required), `providerNpi` (not required), `indication` (not required).
+- Outputs: `caseId`, `caseNumber`.
+- Finish.
+
+#### Action 5 — Update Pre-Auth Case Decision
+- Type: **Apex** | Reference: `PreAuthUpdateAction.updateCaseDecision`
+- Label: `Update Pre-Auth Case Decision` | API Name: `UpdatePreAuthCase`
+- Instructions:
+  > Call AFTER fraud score and benefits check complete. Pass the caseId returned by Create MRI Pre-Auth Case. Pass decision="Working" with a generated authNumber in format AUTH-NNNN when fraud risk < 0.3 AND eligible AND in-network. Otherwise pass decision="Escalated" and put the fraud/benefits reasoning in rationale. NEVER auto-deny.
+- Inputs: `caseId` (Required), `decision` (Required), `rationale` (not required), `authNumber` (not required).
+- Outputs: `caseId`, `status`.
+- Finish.
+
+### Step D — Attach all 5 Actions to the MRI Pre-Authorization topic
+
+Back in **Agent Builder** (tab showing Meridian Pre-Auth Agent):
+
+1. **Topics** panel on the left → click **MRI Pre-Authorization** to open it.
+2. In the center, find the **Actions** section (currently "0 Actions").
+3. Click **+ New / Add Action** → pick **This Agent's Action** → select one of the 5 → **Finish**.
+4. Repeat for all 5.
+5. **Save** the topic.
+
+Verify the topic header now reads **Actions: 5**.
+
+### Step E — Retest in Preview
+
+Click the refresh icon on the Conversation Preview to start a fresh session. Then paste:
+
+> I need to submit an MRI pre-auth for my knee. My Member ID is M-10047.
+
+Agent should ask for CPT / NPI / indication. Reply:
+
+> CPT 73721, NPI 1234567890, torn meniscus confirmed by imaging referral from Dr. Smith
+
+Expected Reasoning flow:
+1. `CreatePreAuthCase` (you'll see the Case appear in the Case list tab)
+2. `CheckEligibility` **and** `ScoreFraudRisk` in parallel
+3. (optional) `GetCoverage`
+4. `UpdatePreAuthCase` with decision="Working" + AUTH-NNNN
+
+Expected member-facing response: "Approved. Authorization AUTH-NNNN. 80% coverage, $250 copay..."
+
+Denial-path script — fresh session, same flow but use `M-10099` with CPT `70553`. Expected: `UpdatePreAuthCase` called with decision="Escalated".
+
+---
+
+**If an action fires but errors out**: Setup → Agents → **Event Logs** (or Agent Builder → the specific Reasoning panel step) shows the callout error. The most likely culprits are (a) the Named Credential URL (already patched — should be fine), or (b) a required Apex input the planner didn't populate — edit the Action and relax the "Required" flag, or improve the Action Instructions to tell the planner to collect that input.
+
+**If actions still show 0 after Step D**: take a screenshot of the topic editor showing the Actions area + any save errors, and paste here.
 
 ---
 
