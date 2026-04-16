@@ -58,61 +58,137 @@ If **Delete** is greyed out: open the MRI Pre-Authorization **Topic** (Agent Bui
 
 ### Step C — Create the 5 Actions fresh via UI
 
-**Setup → Agents → Agent Actions → New Agent Action** (blue button, top right).
+From either Setup → **Agent Actions** → **New Agent Action**, or from inside the MRI Pre-Authorization topic → "This Topic's Actions" tab → **New**.
 
-For each of the 5, walk this form:
+The form has two screens:
+1. **Screen 1 — Connect an existing action**: pick Reference Action Type + Reference Action Category + Reference Action.
+2. **Screen 2 — Configure your action for Agent**: fill Label, Description, Loading Text, Inputs, Outputs.
+
+Exact copy-paste values for each of the 5 actions follow.
+
+---
 
 #### Action 1 — Score MRI Pre-Auth Fraud Risk
-- **Reference Action Type**: **Apex**
-- **Reference Action**: `FraudAgentAction.scoreRisk` *(start typing "Fraud" to filter the dropdown)*
+
+**Screen 1**:
+- Reference Action Type: **Apex**
+- Reference Action Category: **Invocable Method**
+- Reference Action: **Score Pre-Auth Fraud Risk** *(this is the `@InvocableMethod label` from `FraudAgentAction.scoreRisk`)*
 - Click **Next**
+
+**Screen 2**:
 - **Agent Action Label**: `Score MRI Pre-Auth Fraud Risk`
-- **Agent Action API Name**: `ScoreFraudRisk`
-- **Agent Action Instructions**:
-  > Score a submitted MRI pre-authorization request for fraud risk on a 0–1 scale using the Vertex AI agent. Call this AFTER creating the Case, with memberId, cpt, providerNpi, and indication collected from the member.
-- Scroll to **Inputs** (auto-populated from Apex):
-  - `memberId`: description "Meridian member ID like M-10047". **Required: yes**. Show in Conversation: yes.
-  - `cpt`: description "CPT procedure code". **Required: yes**. Show in Conversation: yes.
-  - `providerNpi`: description "10-digit NPI of ordering provider". Required: no. Show in Conversation: yes.
-  - `indication`: description "Clinical indication / reason". Required: no. Show in Conversation: yes.
-  - `riskTier`, `priorAuthReversals12mo`, `state`: **Show in Conversation: NO** (these come from backend, not the member).
-- **Outputs**: verify `riskScore`, `classification`, `rationale`, `flags` appear. No changes needed.
+- **Agent Action API Name**: `ScoreFraudRisk` *(if prompted)*
+- **Agent Action Description** *(this is the "instructions" — tells the LLM when to call the action)*:
+  > Score a submitted MRI pre-authorization request for fraud risk on a 0–1 scale using the Vertex AI agent. Call AFTER creating the Case, with memberId, cpt, providerNpi, and indication collected from the member. Returns riskScore (0–1), classification (low_risk/elevated/high_risk), rationale, and flags.
+- **Show loading text for this action**: leave checked
+- **Loading Text**: `Running fraud risk analysis...`
+- **Inputs** (auto-populated from Apex @InvocableVariable):
+  | Field | Description to enter | Required | Show in Conversation |
+  |---|---|---|---|
+  | memberId | Meridian member ID, e.g. M-10047 | ✔ Yes | ✔ Yes |
+  | cpt | CPT procedure code being requested | ✔ Yes | ✔ Yes |
+  | providerNpi | 10-digit NPI of the ordering provider | No | ✔ Yes |
+  | indication | Clinical indication / free-text reason | No | ✔ Yes |
+  | riskTier | Payer-assigned risk tier | No | ✘ No |
+  | priorAuthReversals12mo | Reversals in last 12 months | No | ✘ No |
+  | state | Two-letter state code | No | ✘ No |
+- **Outputs** (auto-populated — no changes needed):
+  - `riskScore` · `classification` · `rationale` · `flags`
 - Click **Finish**.
 
+---
+
 #### Action 2 — Check Member Benefits Eligibility
-- Type: **Apex** | Reference: `BenefitsMCPAction.checkEligibility`
-- Label: `Check Member Benefits Eligibility` | API Name: `CheckEligibility`
-- Instructions:
-  > Verify whether the member is eligible for the requested CPT and whether prior authorization is required. Call in parallel with Score MRI Pre-Auth Fraud Risk.
-- Inputs: `memberId` (Required), `cpt` (Required). Show both in Conversation.
-- Outputs: `eligible`, `networkStatus`, `priorAuthRequired`, `reasonCodes`, `errorMessage` — no changes.
+
+**Screen 1**:
+- Reference Action Type: **Apex**
+- Reference Action Category: **Invocable Method**
+- Reference Action: **Check Member Eligibility**
+- Next.
+
+**Screen 2**:
+- **Agent Action Label**: `Check Member Benefits Eligibility`
+- **Agent Action API Name**: `CheckEligibility`
+- **Agent Action Description**:
+  > Verify whether the member is eligible for the requested CPT and whether prior authorization is required. Call in parallel with Score MRI Pre-Auth Fraud Risk after the Case is created. Returns eligible (bool), networkStatus, priorAuthRequired (bool), and reason codes.
+- **Loading Text**: `Checking your benefits...`
+- **Inputs**:
+  | Field | Description | Required | Show in Conv |
+  |---|---|---|---|
+  | memberId | Meridian member ID | ✔ | ✔ |
+  | cpt | CPT procedure code | ✔ | ✔ |
+- **Outputs**: `eligible` · `networkStatus` · `priorAuthRequired` · `reasonCodes` · `errorMessage`
 - Finish.
+
+---
 
 #### Action 3 — Get Member Coverage Details
-- Type: **Apex** | Reference: `BenefitsCoverageAction.getCoverage`
-- Label: `Get Member Coverage Details` | API Name: `GetCoverage`
-- Instructions:
-  > Call AFTER eligibility is confirmed to get coverage %, copay, and remaining deductible. Include copay + coverage % in the member's approval message.
-- Inputs: `memberId` (Required), `cpt` (Required).
-- Outputs: `coveragePct`, `copay`, `planYearRemainingDeductible`, `reasonCodes`, `errorMessage`.
+
+**Screen 1**:
+- Type: **Apex** | Category: **Invocable Method** | Reference: **Get Member Coverage**
+- Next.
+
+**Screen 2**:
+- **Label**: `Get Member Coverage Details`
+- **API Name**: `GetCoverage`
+- **Description**:
+  > Call AFTER eligibility is confirmed to retrieve coverage %, copay, and remaining deductible. Include these numbers in the member's approval message so they know what they will owe.
+- **Loading Text**: `Fetching coverage details...`
+- **Inputs**:
+  | Field | Description | Required | Show in Conv |
+  |---|---|---|---|
+  | memberId | Meridian member ID | ✔ | ✔ |
+  | cpt | CPT procedure code | ✔ | ✔ |
+- **Outputs**: `coveragePct` · `copay` · `planYearRemainingDeductible` · `reasonCodes` · `errorMessage`
 - Finish.
+
+---
 
 #### Action 4 — Create MRI Pre-Auth Case
-- Type: **Apex** | Reference: `PreAuthCaseAction.createCase`
-- Label: `Create MRI Pre-Auth Case` | API Name: `CreatePreAuthCase`
-- Instructions:
-  > Create a Salesforce Case immediately after collecting memberId, cpt, providerNpi, and indication. The returned caseId MUST be saved — Update Pre-Auth Case Decision needs it later.
-- Inputs: `memberId` (Required), `cpt` (Required), `providerNpi` (not required), `indication` (not required).
-- Outputs: `caseId`, `caseNumber`.
+
+**Screen 1**:
+- Type: **Apex** | Category: **Invocable Method** | Reference: **Create MRI Pre-Auth Case**
+- Next.
+
+**Screen 2**:
+- **Label**: `Create MRI Pre-Auth Case`
+- **API Name**: `CreatePreAuthCase`
+- **Description**:
+  > Create a Salesforce Case immediately after collecting memberId, cpt, providerNpi, and indication. SAVE the returned caseId — Update Pre-Auth Case Decision needs it later to record the decision. Do not call any other action before this one.
+- **Loading Text**: `Creating your pre-auth case...`
+- **Inputs**:
+  | Field | Description | Required | Show in Conv |
+  |---|---|---|---|
+  | memberId | Meridian member ID | ✔ | ✔ |
+  | cpt | CPT procedure code being pre-authorized | ✔ | ✔ |
+  | providerNpi | 10-digit NPI of ordering provider | No | ✔ |
+  | indication | Clinical indication / reason | No | ✔ |
+- **Outputs**: `caseId` · `caseNumber`
 - Finish.
 
+---
+
 #### Action 5 — Update Pre-Auth Case Decision
-- Type: **Apex** | Reference: `PreAuthUpdateAction.updateCaseDecision`
-- Label: `Update Pre-Auth Case Decision` | API Name: `UpdatePreAuthCase`
-- Instructions:
-  > Call AFTER fraud score and benefits check complete. Pass the caseId returned by Create MRI Pre-Auth Case. Pass decision="Working" with a generated authNumber in format AUTH-NNNN when fraud risk < 0.3 AND eligible AND in-network. Otherwise pass decision="Escalated" and put the fraud/benefits reasoning in rationale. NEVER auto-deny.
-- Inputs: `caseId` (Required), `decision` (Required), `rationale` (not required), `authNumber` (not required).
-- Outputs: `caseId`, `status`.
+
+**Screen 1**:
+- Type: **Apex** | Category: **Invocable Method** | Reference: **Update Pre-Auth Case Decision**
+- Next.
+
+**Screen 2**:
+- **Label**: `Update Pre-Auth Case Decision`
+- **API Name**: `UpdatePreAuthCase`
+- **Description**:
+  > Call AFTER fraud score AND benefits eligibility complete. Pass the caseId returned by Create MRI Pre-Auth Case. Set decision="Working" with a generated authNumber in format AUTH-NNNN when riskScore < 0.3 AND eligible AND networkStatus="in-network". Otherwise set decision="Escalated" and put the combined fraud + benefits reasoning in rationale. NEVER auto-deny — denials always route to a human reviewer.
+- **Loading Text**: `Finalizing decision...`
+- **Inputs**:
+  | Field | Description | Required | Show in Conv |
+  |---|---|---|---|
+  | caseId | Case Id returned by Create MRI Pre-Auth Case | ✔ | ✘ |
+  | decision | Use "Working" for auto-approve, "Escalated" for human review | ✔ | ✘ |
+  | rationale | Combined fraud + benefits reasoning | No | ✘ |
+  | authNumber | Format AUTH-NNNN; only set when decision=Working | No | ✘ |
+- **Outputs**: `caseId` · `status`
 - Finish.
 
 ### Step D — Attach all 5 Actions to the MRI Pre-Authorization topic
