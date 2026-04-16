@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>STEP 2. Call after Check Member Eligibility returns. Returns coveragePct, copay, planYearRemainingDeductible.</description>
+    <description>Retrieves coverage details for a member and procedure. Requires memberId and cpt. Returns coveragePct, copay, planYearRemainingDeductible.</description>
     <developerName>Get_Member_Coverage</developerName>
     <invocationTarget>BenefitsCoverageAction</invocationTarget>
     <invocationTargetType>apex</invocationTargetType>

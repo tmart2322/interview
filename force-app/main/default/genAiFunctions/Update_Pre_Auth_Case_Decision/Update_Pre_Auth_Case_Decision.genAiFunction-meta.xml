@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>STEP 4. Call last. Pass caseId from Step 3. Set decision to Working with authNumber AUTH-NNNN when riskScore less than 0.3 AND eligible AND in-network. Otherwise set decision to Escalated with rationale. Never auto-deny.</description>
+    <description>Updates a pre-authorization Case with the final decision. Requires caseId from Create MRI Pre-Auth Case and decision (Working or Escalated). Set decision to Working with authNumber AUTH-NNNN when riskScore less than 0.3 AND eligible AND in-network; otherwise Escalated with rationale.</description>
     <developerName>Update_Pre_Auth_Case_Decision</developerName>
     <invocationTarget>PreAuthUpdateAction</invocationTarget>
     <invocationTargetType>apex</invocationTargetType>

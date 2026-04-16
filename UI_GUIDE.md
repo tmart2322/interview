@@ -222,6 +222,9 @@ Exact copy-paste values for each of the 5 actions follow.
   | decision | "Working" for auto-approve, "Escalated" for human review | ✔ | ☐ |
   | rationale | Combined fraud + benefits reasoning | ☐ | ☐ |
   | authNumber | Format AUTH-NNNN; only set when decision=Working | ☐ | ☐ |
+  | riskScore | Fraud risk score 0-1 from Score MRI Pre-Auth Fraud Risk | ☐ | ☐ |
+  | fraudClassification | low_risk, elevated, or high_risk from fraud scoring | ☐ | ☐ |
+  | fraudFlags | Comma-separated list of fraud flags from fraud scoring | ☐ | ☐ |
 - **Outputs** (fill Description for each; both checkboxes unchecked):
   | Field | Description |
   |---|---|

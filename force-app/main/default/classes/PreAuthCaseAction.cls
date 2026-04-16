@@ -22,7 +22,9 @@ public with sharing class PreAuthCaseAction {
                 Status = 'New',
                 Type = 'MRI Pre-Auth',
                 Origin = 'Chat',
-                MemberId__c = req.memberId
+                MemberId__c = req.memberId,
+                CPTCode__c = req.cpt,
+                ProviderNPI__c = req.providerNpi
             ));
         }
         insert toInsert;

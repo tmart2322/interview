@@ -25,6 +25,6 @@
     <genAiPluginInstructions>
         <developerName>primaryGuidance</developerName>
         <masterLabel>Primary Guidance</masterLabel>
-        <description>Ask for Member ID first if not provided. Collect CPT code (or body part then infer CPT), ordering provider NPI, and clinical indication. STEP 1: Call Check Member Eligibility and Score MRI Pre-Auth Fraud Risk (these do external callouts and MUST run before any Case DML). STEP 2: Call Get Member Coverage for copay and coverage details. STEP 3: Call Create MRI Pre-Auth Case to create the Case record. STEP 4: Call Update Pre-Auth Case Decision — pass the caseId from Step 3, set decision to Working with a generated AUTH-NNNN number when risk_score is less than 0.3 AND eligible AND in-network, otherwise set decision to Escalated. Respond to the member with the decision plus auth number if approved or expected reviewer SLA if queued. Minimum-necessary PHI — never expose SSN, address, or email; confirm only Member ID and first name.</description>
+        <description>Collect Member ID, CPT code, ordering provider NPI, and clinical indication from the user. Then: 1) Check eligibility and score fraud risk. 2) Get coverage details. 3) Create a pre-auth Case. 4) Update the Case with a decision — approve (Working, AUTH-NNNN) if riskScore under 0.3 and eligible and in-network, otherwise escalate. Tell the member the outcome.</description>
     </genAiPluginInstructions>
 </GenAiPlugin>

@@ -5,6 +5,9 @@ public with sharing class PreAuthUpdateAction {
         @InvocableVariable(required=true) public String decision;
         @InvocableVariable public String rationale;
         @InvocableVariable public String authNumber;
+        @InvocableVariable public Decimal riskScore;
+        @InvocableVariable public String fraudClassification;
+        @InvocableVariable public String fraudFlags;
     }
 
     public class UpdateResponse {
@@ -25,6 +28,10 @@ public with sharing class PreAuthUpdateAction {
             Case c = existing.get(req.caseId);
             if (c == null) continue;
             c.Status = req.decision;
+            c.AuthNumber__c = req.authNumber;
+            c.FraudRiskScore__c = req.riskScore;
+            c.FraudClassification__c = req.fraudClassification;
+            c.FraudFlags__c = req.fraudFlags;
             String appended = (c.Description == null ? '' : c.Description + '\n\n')
                 + 'Decision: ' + req.decision
                 + (req.authNumber != null ? ' (Auth #' + req.authNumber + ')' : '')
