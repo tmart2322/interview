@@ -6,22 +6,7 @@
     <language>en_US</language>
     <pluginType>Topic</pluginType>
     <scope>Help members submit MRI pre-authorization requests: verify identity via Member ID, collect CPT + ordering provider NPI + clinical indication, call benefits eligibility and fraud scoring in parallel, create a Case, synthesize an approval or route to human review. Activate when the member mentions MRI, pre-auth, prior authorization, imaging approval, or a CPT code starting with 7.</scope>
-    <canEscalate>true</canEscalate>
-    <genAiFunctions>
-        <functionName>ScoreFraudRisk</functionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <functionName>CheckEligibility</functionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <functionName>GetCoverage</functionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <functionName>CreatePreAuthCase</functionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <functionName>UpdatePreAuthCase</functionName>
-    </genAiFunctions>
+    <canEscalate>false</canEscalate>
     <genAiPluginInstructions>
         <developerName>primaryGuidance</developerName>
         <masterLabel>Primary Guidance</masterLabel>

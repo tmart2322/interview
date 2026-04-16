@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <masterLabel>Score MRI Pre-Auth Fraud Risk</masterLabel>
-    <description>Calls Vertex AI fraud agent to score a pre-auth on a 0-1 fraud risk scale with rationale and flags.</description>
-    <invocationTarget>FraudAgentAction</invocationTarget>
-    <invocationTargetType>apex</invocationTargetType>
-    <isConfirmationRequired>false</isConfirmationRequired>
-</GenAiFunction>
