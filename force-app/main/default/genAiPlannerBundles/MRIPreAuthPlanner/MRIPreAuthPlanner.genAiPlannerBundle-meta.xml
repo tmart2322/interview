@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Meridian Pre-Auth Planner</masterLabel>
+    <description>ReAct planner for the Meridian MRI Pre-Auth Agent; binds the MRI Pre-Authorization topic.</description>
+    <plannerType>AiCopilot__ReAct</plannerType>
+    <genAiPlugins>
+        <genAiPluginName>MRIPreAuth</genAiPluginName>
+    </genAiPlugins>
+</GenAiPlannerBundle>

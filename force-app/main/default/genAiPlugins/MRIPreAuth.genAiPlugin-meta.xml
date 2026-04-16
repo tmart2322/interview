@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlugin xmlns="http://soap.sforce.com/2006/04/metadata">
+    <developerName>MRIPreAuth</developerName>
+    <masterLabel>MRI Pre-Authorization</masterLabel>
+    <description>Handles MRI pre-authorization requests end-to-end: identity verification, benefits check, fraud scoring, case create/update.</description>
+    <language>en_US</language>
+    <pluginType>Topic</pluginType>
+    <scope>Help members submit MRI pre-authorization requests: verify identity via Member ID, collect CPT + ordering provider NPI + clinical indication, call benefits eligibility and fraud scoring in parallel, create a Case, synthesize an approval or route to human review. Activate when the member mentions MRI, pre-auth, prior authorization, imaging approval, or a CPT code starting with 7.</scope>
+    <canEscalate>true</canEscalate>
+    <genAiFunctions>
+        <functionName>ScoreFraudRisk</functionName>
+    </genAiFunctions>
+    <genAiFunctions>
+        <functionName>CheckEligibility</functionName>
+    </genAiFunctions>
+    <genAiFunctions>
+        <functionName>GetCoverage</functionName>
+    </genAiFunctions>
+    <genAiFunctions>
+        <functionName>CreatePreAuthCase</functionName>
+    </genAiFunctions>
+    <genAiFunctions>
+        <functionName>UpdatePreAuthCase</functionName>
+    </genAiFunctions>
+    <genAiPluginInstructions>
+        <developerName>primaryGuidance</developerName>
+        <masterLabel>Primary Guidance</masterLabel>
+        <description>Ask for Member ID first if not provided. Collect CPT code (or body part, then infer CPT), ordering provider NPI, and clinical indication. Create the Case immediately to obtain a caseId. In parallel, call Check Eligibility and Score Fraud Risk. Auto-approve ONLY when eligible AND in-network AND risk_score &lt; 0.3 — call Update Pre-Auth Case Decision with decision="Working", generate an authorization number in the form AUTH-NNNN, and include the rationale. Otherwise route to human review: Update Pre-Auth Case Decision with decision="Escalated" and include fraud + benefits reasoning in the rationale. Respond to the member with the decision plus the auth number (if approved) or the expected reviewer SLA (if queued, citing state prompt-pay statutes for TX, CA, NY, or WA). Minimum-necessary PHI — never expose SSN, address, or email; confirm only Member ID and first name.</description>
+    </genAiPluginInstructions>
+</GenAiPlugin>
