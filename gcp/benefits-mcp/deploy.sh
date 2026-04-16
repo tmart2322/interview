@@ -25,7 +25,7 @@ fi
 
 REGION="${REGION:-us-central1}"
 SERVICE_NAME="benefits-mcp"
-IMAGE="gcr.io/${PROJECT_ID}/${SERVICE_NAME}"
+IMAGE="us-docker.pkg.dev/${PROJECT_ID}/gcr-io/${SERVICE_NAME}"
 
 echo "==> Project  : ${PROJECT_ID}"
 echo "==> Region   : ${REGION}"

@@ -26,7 +26,7 @@ fi
 
 REGION="us-central1"
 SERVICE_NAME="fraud-agent"
-IMAGE="gcr.io/${GCP_PROJECT}/${SERVICE_NAME}"
+IMAGE="us-docker.pkg.dev/${GCP_PROJECT}/gcr-io/${SERVICE_NAME}"
 
 echo "==> Project  : ${GCP_PROJECT}"
 echo "==> Region   : ${REGION}"

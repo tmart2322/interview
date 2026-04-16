@@ -16,13 +16,20 @@
 - [x] Meridian Health site (`/site/index.html` + `.github/workflows/pages.yml`) — single-page, snippet marker in place
 - [x] SF metadata scaffold (`/force-app/main/default/` — Case.MemberId__c, MRIPreAuthAgentPerms, 2 Named Credentials, 3 invocable Apex classes + test, `manifest/package.xml`)
 
-### Deployments (wave 2 — needs wave 1 done + user creds)
-- [ ] GCP: create fresh project, enable Vertex AI + Cloud Run APIs *(user action)*
-- [ ] Deploy Vertex Fraud Agent to Cloud Run (us-central1, min-instances=1)
-- [ ] Deploy Benefits MCP to Cloud Run (us-central1, min-instances=1)
-- [ ] GitHub: create repo `tmart2322/interview` (public), push /site/, enable Pages
-- [ ] Deploy SF metadata: `sf project deploy start --source-dir force-app --target-org interview`
-- [ ] Update SF Named Credential URLs to real Cloud Run URLs + redeploy
+### Deployments (wave 2)
+- [x] GCP: project `meridian-demo-2026`, APIs enabled (aiplatform, run, cloudbuild, artifactregistry, storage)
+- [x] Deploy Vertex Fraud Agent → `https://fraud-agent-re72ei6qxa-uc.a.run.app` (verified live, Gemini 2.5 scoring)
+- [x] Deploy Benefits MCP → `https://benefits-mcp-re72ei6qxa-uc.a.run.app` (verified live)
+- [x] GitHub: repo `tmart2322/interview` pushed; Pages workflow will run
+- [x] Deploy SF metadata: 7 Apex classes + field + permset + 2 named credentials, **all 7 tests pass**
+- [x] Named Credential URLs patched with real Cloud Run URLs pre-deploy
+
+**Wave 2 lessons baked in:**
+- Cloud Build default compute SA needed storage.admin + artifactregistry.admin + logging.logWriter
+- `gcr.io` push fails on new projects → switched images to `us-docker.pkg.dev/<proj>/gcr-io/<svc>` via an Artifact Registry repo
+- Fraud agent needed env vars `GOOGLE_GENAI_USE_VERTEXAI=true`, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION` + compute SA granted `roles/aiplatform.admin`
+- Apex rule: only one `@InvocableMethod` per class → split into BenefitsMCPAction / BenefitsCoverageAction / BenefitsCalloutHelper and PreAuthCaseAction / PreAuthUpdateAction
+- Fraud agent body is snake_case + requires nested `member_context`
 
 ### Salesforce UI work (requires Tristan clicks)
 - [ ] Register External Services for FraudAgent + BenefitsMCP via Setup UI

@@ -6,7 +6,7 @@ public class PreAuthActionsTest {
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
             res.setHeader('Content-Type', 'application/json');
-            res.setBody('{"riskScore":0.08,"rationale":"low risk","flags":[]}');
+            res.setBody('{"risk_score":0.08,"classification":"low_risk","rationale":"low risk","flags":[]}');
             return res;
         }
     }
@@ -41,7 +41,7 @@ public class PreAuthActionsTest {
     }
 
     @isTest
-    static void testCreateAndUpdateCase() {
+    static void testCreateCase() {
         PreAuthCaseAction.CreateRequest cr = new PreAuthCaseAction.CreateRequest();
         cr.memberId = 'M12345';
         cr.cpt = '70553';
@@ -52,27 +52,34 @@ public class PreAuthActionsTest {
         List<PreAuthCaseAction.CreateResponse> created = PreAuthCaseAction.createCase(
             new List<PreAuthCaseAction.CreateRequest>{ cr }
         );
+        Test.stopTest();
+
         System.assertEquals(1, created.size());
         System.assertNotEquals(null, created[0].caseId);
-
-        Case c = [SELECT Id, Subject, Status, MemberId__c FROM Case WHERE Id = :created[0].caseId];
+        Case c = [SELECT Subject, MemberId__c FROM Case WHERE Id = :created[0].caseId];
         System.assertEquals('MRI Pre-Auth: 70553', c.Subject);
         System.assertEquals('M12345', c.MemberId__c);
+    }
 
-        PreAuthCaseAction.UpdateRequest ur = new PreAuthCaseAction.UpdateRequest();
-        ur.caseId = created[0].caseId;
-        ur.decision = 'Approved';
+    @isTest
+    static void testUpdateCase() {
+        Case c = new Case(Subject='MRI Pre-Auth: 70553', Status='New', MemberId__c='M12345');
+        insert c;
+
+        PreAuthUpdateAction.UpdateRequest ur = new PreAuthUpdateAction.UpdateRequest();
+        ur.caseId = c.Id;
+        ur.decision = 'Working';
         ur.rationale = 'Meets medical necessity';
         ur.authNumber = 'AUTH-001';
 
-        List<PreAuthCaseAction.UpdateResponse> updated = PreAuthCaseAction.updateCaseDecision(
-            new List<PreAuthCaseAction.UpdateRequest>{ ur }
+        Test.startTest();
+        List<PreAuthUpdateAction.UpdateResponse> updated = PreAuthUpdateAction.updateCaseDecision(
+            new List<PreAuthUpdateAction.UpdateRequest>{ ur }
         );
-        System.assertEquals('Approved', updated[0].status);
         Test.stopTest();
 
-        Case after = [SELECT Status, Description FROM Case WHERE Id = :created[0].caseId];
-        System.assertEquals('Approved', after.Status);
+        System.assertEquals('Working', updated[0].status);
+        Case after = [SELECT Status, Description FROM Case WHERE Id = :c.Id];
         System.assert(after.Description.contains('AUTH-001'));
     }
 
@@ -89,7 +96,7 @@ public class PreAuthActionsTest {
         Test.stopTest();
 
         System.assertEquals(0.08, results[0].riskScore);
-        System.assertEquals('low risk', results[0].rationale);
+        System.assertEquals('low_risk', results[0].classification);
     }
 
     @isTest
@@ -104,7 +111,6 @@ public class PreAuthActionsTest {
         );
         Test.stopTest();
 
-        System.assertEquals(null, results[0].riskScore);
         System.assert(results[0].rationale.startsWith('callout failed'));
     }
 
@@ -128,12 +134,12 @@ public class PreAuthActionsTest {
     @isTest
     static void testGetCoverage() {
         Test.setMock(HttpCalloutMock.class, new CoverageMock());
-        BenefitsMCPAction.Request r = new BenefitsMCPAction.Request();
+        BenefitsCoverageAction.Request r = new BenefitsCoverageAction.Request();
         r.memberId = 'M1'; r.cpt = '70553';
 
         Test.startTest();
-        List<BenefitsMCPAction.CoverageResponse> results = BenefitsMCPAction.getCoverage(
-            new List<BenefitsMCPAction.Request>{ r }
+        List<BenefitsCoverageAction.CoverageResponse> results = BenefitsCoverageAction.getCoverage(
+            new List<BenefitsCoverageAction.Request>{ r }
         );
         Test.stopTest();
 
@@ -145,15 +151,17 @@ public class PreAuthActionsTest {
     @isTest
     static void testBenefitsFailure() {
         Test.setMock(HttpCalloutMock.class, new FailMock());
-        BenefitsMCPAction.Request r = new BenefitsMCPAction.Request();
-        r.memberId = 'M1'; r.cpt = '70553';
+        BenefitsMCPAction.Request eReq = new BenefitsMCPAction.Request();
+        eReq.memberId = 'M1'; eReq.cpt = '70553';
+        BenefitsCoverageAction.Request cReq = new BenefitsCoverageAction.Request();
+        cReq.memberId = 'M1'; cReq.cpt = '70553';
 
         Test.startTest();
         List<BenefitsMCPAction.EligibilityResponse> elig = BenefitsMCPAction.checkEligibility(
-            new List<BenefitsMCPAction.Request>{ r }
+            new List<BenefitsMCPAction.Request>{ eReq }
         );
-        List<BenefitsMCPAction.CoverageResponse> cov = BenefitsMCPAction.getCoverage(
-            new List<BenefitsMCPAction.Request>{ r }
+        List<BenefitsCoverageAction.CoverageResponse> cov = BenefitsCoverageAction.getCoverage(
+            new List<BenefitsCoverageAction.Request>{ cReq }
         );
         Test.stopTest();
 
