@@ -1,9 +1,21 @@
-openapi: "3.0.3"
+<?xml version="1.0" encoding="UTF-8"?>
+<ExternalServiceRegistration xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Vertex Fraud Agent</label>
+    <namedCredential>VertexFraudAgent</namedCredential>
+    <namedCredentialReference>VertexFraudAgent</namedCredentialReference>
+    <schemaType>OpenApi3</schemaType>
+    <schemaUploadFileExtension>yaml</schemaUploadFileExtension>
+    <schemaUploadFileName>openapi</schemaUploadFileName>
+    <registrationProviderType>Custom</registrationProviderType>
+    <systemVersion>3</systemVersion>
+    <status>Complete</status>
+    <operations><name>scoreFraudRisk</name><active>true</active></operations>
+    <schema>openapi: "3.0.3"
 
 info:
   title: Meridian Fraud Risk Agent
   version: "0.1.0"
-  description: >
+  description: &gt;
     Scores MRI pre-authorization requests for fraud risk signals using Gemini 2.5 Pro.
     Designed for registration as a Salesforce External Service.
     Note: no authentication scheme is configured — this is a demo simplification.
@@ -18,7 +30,7 @@ paths:
     post:
       operationId: scoreFraudRisk
       summary: Score a pre-authorization request for fraud risk
-      description: >
+      description: &gt;
         Accepts an MRI pre-authorization request and returns a Gemini-generated
         fraud-risk score with classification and rationale.
         Outputs are for human-reviewer routing; they are not legal fraud determinations.
@@ -157,16 +169,16 @@ components:
             - low_risk
             - elevated
             - high_risk
-          description: >
-            Categorical classification: low_risk (<0.30), elevated (0.30–0.69),
-            high_risk (>=0.70).
+          description: &gt;
+            Categorical classification: low_risk (&lt;0.30), elevated (0.30–0.69),
+            high_risk (&gt;=0.70).
           example: "low_risk"
         rationale:
           type: string
-          description: >
+          description: &gt;
             Human-readable explanation citing the specific signals that drove the score.
             Required for audit and human-reviewer handoff.
-          example: >
+          example: &gt;
             No prior reversals in 12 months; indication matches CPT; provider in
             expected geography.
         flags:
@@ -214,3 +226,5 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ValidationError"
+</schema>
+</ExternalServiceRegistration>

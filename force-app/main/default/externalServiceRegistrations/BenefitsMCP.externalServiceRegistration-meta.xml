@@ -1,4 +1,17 @@
-openapi: 3.0.3
+<?xml version="1.0" encoding="UTF-8"?>
+<ExternalServiceRegistration xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Benefits MCP</label>
+    <namedCredential>BenefitsMCP</namedCredential>
+    <namedCredentialReference>BenefitsMCP</namedCredentialReference>
+    <schemaType>OpenApi3</schemaType>
+    <schemaUploadFileExtension>yaml</schemaUploadFileExtension>
+    <schemaUploadFileName>openapi</schemaUploadFileName>
+    <registrationProviderType>Custom</registrationProviderType>
+    <systemVersion>3</systemVersion>
+    <status>Complete</status>
+    <operations><name>checkEligibility</name><active>true</active></operations>
+    <operations><name>getCoverage</name><active>true</active></operations>
+    <schema>openapi: 3.0.3
 info:
   title: Meridian Benefits Verification API
   version: 0.1.0
@@ -117,3 +130,5 @@ components:
           type: string
         message:
           type: string
+</schema>
+</ExternalServiceRegistration>
