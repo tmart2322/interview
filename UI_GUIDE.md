@@ -64,6 +64,17 @@ The form has two screens:
 1. **Screen 1 — Connect an existing action**: pick Reference Action Type + Reference Action Category + Reference Action.
 2. **Screen 2 — Configure your action for Agent**: fill Label, Description, Loading Text, Inputs, Outputs.
 
+**Exact checkbox names on Screen 2** (SF uses its own terminology):
+
+| My label below | Actual SF checkbox | Meaning |
+|---|---|---|
+| **Required** (on input) | `Require input` | The LLM must have this value before calling the action |
+| **Ask user** (on input) | `Collect data from user` | Agent will prompt the member for this in chat |
+| **Hide** (on output) | `Filter from agent action` | Hide this field from the LLM's view (rarely used) |
+| **Echo** (on output) | `Show in conversation` | Render this field inline in the chat as a structured chip |
+
+**Every Input AND Output has a required Description field** (red asterisk). Fill all of them — blank Descriptions are the most common "Finish button stays greyed out" cause.
+
 Exact copy-paste values for each of the 5 actions follow.
 
 ---
@@ -84,17 +95,22 @@ Exact copy-paste values for each of the 5 actions follow.
 - **Show loading text for this action**: leave checked
 - **Loading Text**: `Running fraud risk analysis...`
 - **Inputs** (auto-populated from Apex @InvocableVariable):
-  | Field | Description to enter | Required | Show in Conversation |
+  | Field | Description to enter | Require input | Collect data from user |
   |---|---|---|---|
-  | memberId | Meridian member ID, e.g. M-10047 | ✔ Yes | ✔ Yes |
-  | cpt | CPT procedure code being requested | ✔ Yes | ✔ Yes |
-  | providerNpi | 10-digit NPI of the ordering provider | No | ✔ Yes |
-  | indication | Clinical indication / free-text reason | No | ✔ Yes |
-  | riskTier | Payer-assigned risk tier | No | ✘ No |
-  | priorAuthReversals12mo | Reversals in last 12 months | No | ✘ No |
-  | state | Two-letter state code | No | ✘ No |
-- **Outputs** (auto-populated — no changes needed):
-  - `riskScore` · `classification` · `rationale` · `flags`
+  | memberId | Meridian member ID, e.g. M-10047 | ✔ | ✔ |
+  | cpt | CPT procedure code being requested, e.g. 73721 | ✔ | ✔ |
+  | providerNpi | 10-digit NPI of the ordering provider | ☐ | ✔ |
+  | indication | Clinical indication / free-text reason | ☐ | ✔ |
+  | riskTier | Payer-assigned risk tier; default standard if unknown | ☐ | ☐ |
+  | priorAuthReversals12mo | Reversals in last 12 months; default 0 if unknown | ☐ | ☐ |
+  | state | Two-letter state code for member residence | ☐ | ☐ |
+- **Outputs** (fill Description for each; leave both checkboxes unchecked):
+  | Field | Description |
+  |---|---|
+  | riskScore | Continuous fraud-risk score between 0 and 1 |
+  | classification | low_risk, elevated, or high_risk |
+  | rationale | Human-readable explanation citing specific signals |
+  | flags | List of explicit risk flags found |
 - Click **Finish**.
 
 ---
@@ -114,11 +130,18 @@ Exact copy-paste values for each of the 5 actions follow.
   > Verify whether the member is eligible for the requested CPT and whether prior authorization is required. Call in parallel with Score MRI Pre-Auth Fraud Risk after the Case is created. Returns eligible (bool), networkStatus, priorAuthRequired (bool), and reason codes.
 - **Loading Text**: `Checking your benefits...`
 - **Inputs**:
-  | Field | Description | Required | Show in Conv |
+  | Field | Description | Require input | Collect data from user |
   |---|---|---|---|
   | memberId | Meridian member ID | ✔ | ✔ |
   | cpt | CPT procedure code | ✔ | ✔ |
-- **Outputs**: `eligible` · `networkStatus` · `priorAuthRequired` · `reasonCodes` · `errorMessage`
+- **Outputs** (fill Description for each; both checkboxes unchecked):
+  | Field | Description |
+  |---|---|
+  | eligible | Whether the member is eligible for this CPT |
+  | networkStatus | in-network, out-of-network, or not-covered |
+  | priorAuthRequired | True if prior authorization is required |
+  | reasonCodes | Eligibility reason codes |
+  | errorMessage | Populated only if the callout failed |
 - Finish.
 
 ---
@@ -136,11 +159,18 @@ Exact copy-paste values for each of the 5 actions follow.
   > Call AFTER eligibility is confirmed to retrieve coverage %, copay, and remaining deductible. Include these numbers in the member's approval message so they know what they will owe.
 - **Loading Text**: `Fetching coverage details...`
 - **Inputs**:
-  | Field | Description | Required | Show in Conv |
+  | Field | Description | Require input | Collect data from user |
   |---|---|---|---|
   | memberId | Meridian member ID | ✔ | ✔ |
   | cpt | CPT procedure code | ✔ | ✔ |
-- **Outputs**: `coveragePct` · `copay` · `planYearRemainingDeductible` · `reasonCodes` · `errorMessage`
+- **Outputs** (fill Description for each; both checkboxes unchecked):
+  | Field | Description |
+  |---|---|
+  | coveragePct | Percent of cost covered by the plan (0-100) |
+  | copay | Member copay in USD |
+  | planYearRemainingDeductible | Remaining deductible this plan year in USD |
+  | reasonCodes | Coverage reason codes |
+  | errorMessage | Populated only if the callout failed |
 - Finish.
 
 ---
@@ -158,13 +188,17 @@ Exact copy-paste values for each of the 5 actions follow.
   > Create a Salesforce Case immediately after collecting memberId, cpt, providerNpi, and indication. SAVE the returned caseId — Update Pre-Auth Case Decision needs it later to record the decision. Do not call any other action before this one.
 - **Loading Text**: `Creating your pre-auth case...`
 - **Inputs**:
-  | Field | Description | Required | Show in Conv |
+  | Field | Description | Require input | Collect data from user |
   |---|---|---|---|
   | memberId | Meridian member ID | ✔ | ✔ |
   | cpt | CPT procedure code being pre-authorized | ✔ | ✔ |
-  | providerNpi | 10-digit NPI of ordering provider | No | ✔ |
-  | indication | Clinical indication / reason | No | ✔ |
-- **Outputs**: `caseId` · `caseNumber`
+  | providerNpi | 10-digit NPI of ordering provider | ☐ | ✔ |
+  | indication | Clinical indication / reason | ☐ | ✔ |
+- **Outputs** (fill Description for each; both checkboxes unchecked):
+  | Field | Description |
+  |---|---|
+  | caseId | Salesforce 18-char Case Id |
+  | caseNumber | Human-readable Case number |
 - Finish.
 
 ---
@@ -182,13 +216,17 @@ Exact copy-paste values for each of the 5 actions follow.
   > Call AFTER fraud score AND benefits eligibility complete. Pass the caseId returned by Create MRI Pre-Auth Case. Set decision="Working" with a generated authNumber in format AUTH-NNNN when riskScore < 0.3 AND eligible AND networkStatus="in-network". Otherwise set decision="Escalated" and put the combined fraud + benefits reasoning in rationale. NEVER auto-deny — denials always route to a human reviewer.
 - **Loading Text**: `Finalizing decision...`
 - **Inputs**:
-  | Field | Description | Required | Show in Conv |
+  | Field | Description | Require input | Collect data from user |
   |---|---|---|---|
-  | caseId | Case Id returned by Create MRI Pre-Auth Case | ✔ | ✘ |
-  | decision | Use "Working" for auto-approve, "Escalated" for human review | ✔ | ✘ |
-  | rationale | Combined fraud + benefits reasoning | No | ✘ |
-  | authNumber | Format AUTH-NNNN; only set when decision=Working | No | ✘ |
-- **Outputs**: `caseId` · `status`
+  | caseId | Case Id returned by Create MRI Pre-Auth Case | ✔ | ☐ |
+  | decision | "Working" for auto-approve, "Escalated" for human review | ✔ | ☐ |
+  | rationale | Combined fraud + benefits reasoning | ☐ | ☐ |
+  | authNumber | Format AUTH-NNNN; only set when decision=Working | ☐ | ☐ |
+- **Outputs** (fill Description for each; both checkboxes unchecked):
+  | Field | Description |
+  |---|---|
+  | caseId | Case Id that was updated |
+  | status | New Case Status value |
 - Finish.
 
 ### Step D — Attach all 5 Actions to the MRI Pre-Authorization topic
