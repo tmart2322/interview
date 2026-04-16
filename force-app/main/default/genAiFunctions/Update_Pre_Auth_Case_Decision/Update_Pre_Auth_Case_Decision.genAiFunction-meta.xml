@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Call AFTER fraud score AND benefits eligibility complete. Pass the caseId returned by Create MRI Pre-Auth Case. Set decision="Working" with a generated authNumber in format AUTH-NNNN when riskScore &lt; 0.3 AND eligible AND networkStatus="in-network". Otherwise set decision="Escalated" and put combined fraud + benefits reasoning in rationale. NEVER auto-deny — denials always route to a human reviewer.</description>
+    <developerName>Update_Pre_Auth_Case_Decision</developerName>
+    <invocationTarget>PreAuthUpdateAction</invocationTarget>
+    <invocationTargetType>apex</invocationTargetType>
+    <isConfirmationRequired>false</isConfirmationRequired>
+    <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+    <localDeveloperName>Update_Pre_Auth_Case_Decision</localDeveloperName>
+    <masterLabel>Update Pre-Auth Case Decision</masterLabel>
+    <progressIndicatorMessage>Finalizing decision...</progressIndicatorMessage>
+</GenAiFunction>

@@ -1,0 +1,35 @@
+{
+  "required" : [ "caseId", "decision" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "caseId" : {
+      "title" : "caseId",
+      "description" : "Case Id returned by Create MRI Pre-Auth Case",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "decision" : {
+      "title" : "decision",
+      "description" : "'Working' for auto-approve, 'Escalated' for human review",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "rationale" : {
+      "title" : "rationale",
+      "description" : "Combined fraud + benefits reasoning",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "authNumber" : {
+      "title" : "authNumber",
+      "description" : "Format AUTH-NNNN; only set when decision=Working",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

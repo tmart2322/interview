@@ -1,0 +1,56 @@
+{
+  "required" : [ "cpt", "memberId" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "cpt" : {
+      "title" : "cpt",
+      "description" : "CPT procedure code being requested, e.g. 73721",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "indication" : {
+      "title" : "indication",
+      "description" : "Clinical indication / free-text reason",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "memberId" : {
+      "title" : "memberId",
+      "description" : "Meridian member ID, e.g. M-10047",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "priorAuthReversals12mo" : {
+      "title" : "priorAuthReversals12mo",
+      "description" : "Reversals in last 12 months; default 0 if unknown",
+      "lightning:type" : "lightning__integerType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "providerNpi" : {
+      "title" : "providerNpi",
+      "description" : "10-digit NPI of the ordering provider",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "riskTier" : {
+      "title" : "riskTier",
+      "description" : "Payer-assigned risk tier; default standard if unknown",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "state" : {
+      "title" : "state",
+      "description" : "Two-letter state code for member residence",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

@@ -1,0 +1,35 @@
+{
+  "required" : [ "cpt", "memberId" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "cpt" : {
+      "title" : "cpt",
+      "description" : "CPT procedure code being pre-authorized",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "memberId" : {
+      "title" : "memberId",
+      "description" : "Meridian member ID",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "providerNpi" : {
+      "title" : "providerNpi",
+      "description" : "10-digit NPI of ordering provider",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    },
+    "indication" : {
+      "title" : "indication",
+      "description" : "Clinical indication / reason",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}
