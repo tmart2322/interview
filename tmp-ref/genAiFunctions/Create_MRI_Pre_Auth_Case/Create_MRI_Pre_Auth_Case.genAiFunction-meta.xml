@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>STEP 3. Call AFTER fraud and eligibility checks complete. Creates a Case. Returns caseId and caseNumber. Save the caseId for the next step.</description>
+    <description>Create a Salesforce Case immediately after collecting memberId, cpt, providerNpi, and indication. SAVE the returned caseId — Update Pre-Auth Case Decision needs it later. Do not call any other action before this one.</description>
     <developerName>Create_MRI_Pre_Auth_Case</developerName>
     <invocationTarget>PreAuthCaseAction</invocationTarget>
     <invocationTargetType>apex</invocationTargetType>

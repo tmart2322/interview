@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Retrieve coverage percent, copay, and remaining deductible. Call AFTER eligibility is confirmed. Include these numbers in the member's approval message.</description>
+    <description>STEP 2. Call after Check Member Eligibility returns. Returns coveragePct, copay, planYearRemainingDeductible.</description>
     <developerName>Get_Member_Coverage</developerName>
     <invocationTarget>BenefitsCoverageAction</invocationTarget>
     <invocationTargetType>apex</invocationTargetType>

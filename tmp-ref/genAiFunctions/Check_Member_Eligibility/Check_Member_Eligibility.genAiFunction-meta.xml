@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>STEP 1. Call this as soon as memberId and cpt are collected. Do NOT wait for Case creation. Returns eligible, networkStatus, priorAuthRequired.</description>
+    <description>Verify whether the member is eligible for the requested CPT and whether prior authorization is required. Call in parallel with Score Pre-Auth Fraud Risk after the Case is created.</description>
     <developerName>Check_Member_Eligibility</developerName>
     <invocationTarget>BenefitsMCPAction</invocationTarget>
     <invocationTargetType>apex</invocationTargetType>

@@ -520,6 +520,22 @@
   })();
 </script>
 
-<!-- AGENTFORCE_EMBEDDED_MESSAGING_SNIPPET -->
+<!-- Agentforce Embedded Messaging -->
+<script type="text/javascript" src="https://orgfarm-2fd995e381-dev-ed.develop.my.salesforce-scrt.com/assets/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  try {
+    embeddedservice_bootstrap.settings.language = 'en_US';
+    embeddedservice_bootstrap.init(
+      '00Dg5000008b6xt',
+      'Meridian_Web_Chat_2',
+      'https://orgfarm-2fd995e381-dev-ed.develop.my.salesforce-scrt.com',
+      {
+        scrt2URL: 'https://orgfarm-2fd995e381-dev-ed.develop.my.salesforce-scrt.com'
+      }
+    );
+  } catch (err) {
+    console.error('Error loading Embedded Messaging: ', err);
+  }
+</script>
 </body>
 </html>
