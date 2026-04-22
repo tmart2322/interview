@@ -44,6 +44,15 @@
     "plan_year_remaining_deductible": 0,
     "reason_codes": ["NOT_COVERED", "PLAN_EXCLUSION"]
   },
+  "M-10099|70553": {
+    "eligible": true,
+    "coverage_pct": 80,
+    "copay": 200,
+    "prior_auth_required": true,
+    "network_status": "in-network",
+    "plan_year_remaining_deductible": 1100,
+    "reason_codes": []
+  },
   "M-30099|99385": {
     "eligible": true,
     "coverage_pct": 100,

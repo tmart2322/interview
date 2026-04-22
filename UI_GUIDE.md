@@ -313,32 +313,57 @@ If any action errors — check Setup → Agents → **Event Logs** for the speci
 
 ---
 
-## Step 6 — Data 360 External Data Source (10 min, optional but strong for the demo)
+## Step 6 — Data 360: Clinical Encounter History (10 min)
 
-This is what powers the "unified case view" demo flow (Demo Flow 1 in `slides/talk-track.md`).
+This powers the D360 portion of the demo — showing the agent has access to clinical encounter data from an EHR system (simulating Epic/Cerner) via Data 360's federated data layer.
 
-Data Cloud → **Data Streams** → **New**.
-- Source: **External Data Source** (or "Other" → HTTP/JSON depending on UI variant)
-- Name: ServiceNow Cases
-- URL: `https://tmart2322.github.io/interview/servicenow-cases.json`
-- Format: JSON
-- Array path: `$`
+**Data source**: `https://tmart2322.github.io/interview/clinical-encounters.json`
 
-Map fields onto a DLO (Data Lake Object) named `ServiceNow_Case__dlm`:
-- `sys_id` → Id (Primary Key)
-- `number` → CaseNumber
-- `member_id` → MemberId
-- `short_description` → Subject
-- `state` → Status
-- `opened_at` → CreatedDate (DateTime)
+This JSON contains 10 clinical encounter records for demo members:
+- **M-10047 (Jane Doe)**: 4 encounters showing knee pain progression — ortho visit → 12 PT sessions (failed) → ortho follow-up ordering MRI → follow-up awaiting pre-auth
+- **M-10099 (Marcus Reyes)**: 4 encounters showing fraud-pattern signals — 3 imaging studies in 4 months, 3 different providers, 4 facilities, no continuity of care
+- **M-10101 (Linda Nakamura)**: 2 routine encounters (cardiology, labs)
 
-Then Data Cloud → **Data Model** → map `ServiceNow_Case__dlm` into the standard **Case** DMO (or create a unified Case DMO).
+### Step A — Create the Data Stream (done)
 
-**If D360 HTTP JSON source type isn't available in your dev org**, fallback: use the **Ingestion API** — I can generate a one-line `curl` that POSTs the JSON payload to Data Cloud's ingest endpoint. Say the word.
+Data Cloud → **Data Streams** → **New** → **File Upload** → upload `data/clinical-encounters.csv`.
 
-Also create Identity Resolution:
-- **Match rule**: MemberId__c (exact match) across Case DMO sources.
-- Run ruleset once so the unified profile is queryable.
+The Data Stream auto-creates a DLO with all fields mapped. Confirm it ingested 10 records.
+
+### Step B — Create the Salesforce CRM Data Stream
+
+Data Cloud → **Data Streams** → **New** → **Salesforce CRM** → click **Next**.
+
+1. Select the **Case** object
+2. Click **Next** through field mapping — include at minimum: `Id`, `CaseNumber`, `Subject`, `Status`, `Type`, `Origin`, `Description`, `MemberId__c`, `CPTCode__c`, `ProviderNPI__c`, `AuthNumber__c`, `FraudRiskScore__c`, `FraudClassification__c`, `FraudFlags__c`, `CreatedDate`
+3. Finish and deploy
+
+This brings your Salesforce pre-auth Cases into Data Cloud alongside the clinical encounters.
+
+### Step C — Data Model Mapping
+
+Data Cloud → **Data Model**:
+
+1. Find the clinical encounters DLO (created automatically in Step A)
+2. Click on it → **Add to Data Model**
+3. Map it as category **Other** (it's event data, not a person)
+4. Create a **relationship** from the clinical encounters DLO to the **Individual** DMO using the `member_id` field
+5. Do the same for the Case DLO — relate it to Individual via `MemberId__c`
+
+This links both data sources to the same unified member profile.
+
+### Step D — Identity Resolution
+
+Data Cloud → **Identity Resolution** → **New Ruleset**:
+
+1. Name: `Member Identity`
+2. Add a **match rule**: exact match on `member_id` (from clinical encounters) and `MemberId__c` (from Case)
+3. **Run** the ruleset once
+4. Verify: open a unified profile and confirm you see both clinical encounters and Cases for the same member (e.g. M-10047)
+
+### Demo narrative
+
+"The agent has context about Jane's care history — three office visits showing knee pain progression, 12 sessions of PT with limited improvement, ortho referral. That data lives in the EHR. Data 360 federates it into the member's unified profile — no ETL, no data copy, no HIPAA residency risk."
 
 ---
 
